@@ -1,0 +1,29 @@
+{
+  "name": "api.i-love-knitting",
+  "version": "1.0.0",
+  "description": "API backend for i-love-knitting web site",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/massimo-ua/api.i-love-knitting.git"
+  },
+  "keywords": [
+    "api",
+    "rest",
+    "node"
+  ],
+  "author": "Maxim Grishkov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/massimo-ua/api.i-love-knitting/issues"
+  },
+  "homepage": "https://github.com/massimo-ua/api.i-love-knitting#readme",
+  "dependencies": {
+    "express": "^4.13.4",
+    "express-restify-mongoose": "^3.1.0",
+    "mongoose": "^4.4.5"
+  }
+}
