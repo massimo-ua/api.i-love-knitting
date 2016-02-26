@@ -1,0 +1,12 @@
+var debug = require('debug')('api');
+var app = require('../app');
+
+var port = process.env.OPENSHIFT_NODEJS_PORT ||  process.env.OPENSHIFT_INTERNAL_PORT || 8080;
+var ipaddr = process.env.OPENSHIFT_NODEJS_IP || process.env.OPENSHIFT_INTERNAL_IP;
+
+app.set('port', port);
+app.set('ip',ipaddr);
+
+var server = app.listen(app.get('port'),app.get('ip'), function() {
+  console.log('Express server listening');
+});
