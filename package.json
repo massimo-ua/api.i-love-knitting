@@ -25,7 +25,9 @@
     "express": "^4.13.4",
     "express-restify-mongoose": "^3.1.0",
     "mongoose": "^4.4.5",
+    "mongoose-auto-increment": "^5.0.1",
     "path": "^0.12.7",
-    "restify": "^4.0.4"
+    "restify": "^4.0.4",
+    "slug": "^0.9.1"
   }
 }
