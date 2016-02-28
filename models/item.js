@@ -3,10 +3,10 @@ var increment = require('mongoose-auto-increment');
 var slug = require('slug');
 var schema = mongoose.Schema;
 increment.initialize(mongoose);
-
+//console.log(slug('Мій перший та самий улюблений пост').toLowerCase());
 var itemSchema = new schema({
   title: {type: 'String', required: true },
-  permalink: {type: 'String', required: true},
+  permalink: {type: 'String'},
   content: {type: 'String', required: true},
   author: {type: 'Number', required: true},
   datePublished: { type: 'Date', default: Date.now },
@@ -26,8 +26,7 @@ itemSchema.pre('save', function(next) {
   if(!item.isModified('title')) {
     next();
   }
-  item.permalink = slug(item.title);
+  item.permalink = slug(item.title).toLowerCase();
   next();
-  //this.update({},{ $set: { updatedAt: new Date() } });
 });
 module.exports=mongoose.model('Item', itemSchema);
