@@ -9,6 +9,7 @@ var itemSchema = new schema({
   permalink: {type: 'String'},
   content: {type: 'String', required: true},
   author: {type: 'Number', required: true},
+  price: {type: 'Number', default: 0},
   datePublished: { type: 'Date', default: Date.now },
   images: [{
     title: {type: 'String', required: true},
@@ -18,6 +19,11 @@ var itemSchema = new schema({
     content: {type: 'String', required: true},
     author: {type: 'String', required: true},
     datePublished: { type: 'Date', default: Date.now }
+  }],
+  rates: [{
+    value: {type: 'Number', required: true},
+    datePublished: { type: 'Date', default: Date.now },
+    ipaddress: {type: 'String', required: true}
   }]
 });
 itemSchema.plugin(increment.plugin, {model:'Item', startAt:1});
