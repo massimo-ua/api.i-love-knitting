@@ -12,5 +12,12 @@ router.route('/items')
       res.json(items);
     });
   });
+router.route('/items/:id')
+.get(function(req, res){
+  Item.findOne({_id: req.params.id},function(err, item){
+    if(err) res.send(err);
+    res.json(item);
+  });
 
+});
 module.exports=router;
