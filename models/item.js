@@ -18,7 +18,8 @@ var itemSchema = new schema({
   comments: [{
     content: {type: 'String', required: true},
     author: {type: 'String', required: true},
-    datePublished: { type: 'Date', default: Date.now }
+    datePublished: { type: 'Date', default: Date.now },
+    isDisabled: { type: 'Boolean', default: false }
   }],
   rates: [{
     value: {type: 'Number', required: true},
