@@ -12,7 +12,7 @@ var items = require('./routes/items');
 var mongoose = require('mongoose');
 var install = require('./install');
 mongoose.connect(config.DB_URI+config.DB_NAME);
-install.generateItem();
+//install.generateItem();
 
 var app = express();
 

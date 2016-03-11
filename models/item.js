@@ -1,10 +1,10 @@
 var mongoose = require('mongoose');
 var increment = require('mongoose-auto-increment');
 var slug = require('slug');
-var schema = mongoose.Schema;
+var Schema = mongoose.Schema;
 increment.initialize(mongoose);
 //console.log(slug('Мій перший та самий улюблений пост').toLowerCase());
-var itemSchema = new schema({
+var itemSchema = new Schema({
   title: {type: 'String', required: true },
   permalink: {type: 'String'},
   content: {type: 'String', required: true},
@@ -15,19 +15,14 @@ var itemSchema = new schema({
     title: {type: 'String', required: true},
     url: {type: 'String', required: true}
   }],
-  comments: [{
-    content: {type: 'String', required: true},
-    author: {type: 'String', required: true},
-    datePublished: { type: 'Date', default: Date.now },
-    isDisabled: { type: 'Boolean', default: false }
-  }],
+  comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
   rates: [{
     value: {type: 'Number', required: true},
     datePublished: { type: 'Date', default: Date.now },
     ipaddress: {type: 'String', required: true}
   }]
 });
-itemSchema.plugin(increment.plugin, {model:'Item', startAt:1});
+itemSchema.plugin(increment.plugin, { model: 'Item', startAt: 1 });
 itemSchema.pre('save', function(next) {
   var item = this;
   if(!item.isModified('title')) {
