@@ -24,7 +24,7 @@
 14 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:211:5)
 15 verbose pkgid api.i-love-knitting@1.0.0
 16 verbose cwd /home/maxim/Code/api.i-love-knitting
-17 error Linux 4.2.0-30-generic
+17 error Linux 4.2.0-34-generic
 18 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "start"
 19 error node v5.6.0
 20 error npm  v3.6.0

@@ -16,11 +16,7 @@ var itemSchema = new Schema({
     url: {type: 'String', required: true}
   }],
   comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
-  rates: [{
-    value: {type: 'Number', required: true},
-    datePublished: { type: 'Date', default: Date.now },
-    ipaddress: {type: 'String', required: true}
-  }]
+  rates: [{ type: Schema.Types.ObjectId, ref: 'Rate' }]
 });
 itemSchema.plugin(increment.plugin, { model: 'Item', startAt: 1 });
 itemSchema.pre('save', function(next) {
