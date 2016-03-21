@@ -2,20 +2,28 @@ var Item = require('../models/item')
     ,Comment = require('../models/comment')
     ,Rate = require('../models/rate')
     ,express = require('express')
+    ,async = require('async')
     ,router=express.Router();
 
 router.route('/items')
   .get(function(req, res) {
     //res.send('/api/items');
     Item.find({})
-    .populate('comments rates')
+    .populate('comments')
     .lean()
     .exec(function(err, items) {
       if(err) {
         res.send(err);
       }
-
-      res.json(items);
+      async.forEachOf(items, function(item, index, cb){
+        GetItemRating(item._id,function(err,rate){
+          if(err) console.log(err);
+          items[index].rates = rate;
+          cb(err);
+        });
+      }, function(err) {
+        res.json(items);
+      });
     });
   });
 router.route('/items/:id')
