@@ -6,7 +6,7 @@ var Item = require('../models/item')
     ,router=express.Router();
 
 router.route('/items')
-  .get(function(req, res) {
+  .get(function(req, res, next) {
     //res.send('/api/items');
     Item.find({})
     .populate('comments')
@@ -15,13 +15,18 @@ router.route('/items')
       if(err) {
         res.send(err);
       }
-      async.forEachOf(items, function(item, index, cb){
-        GetItemRating(item._id,function(err,rate){
-          if(err) console.log(err);
-          items[index].rates = rate;
-          cb(err);
+      async.forEachOf(items, function(item, index, callback) {
+        GetItemRating(item._id, function(err, rate) {
+          if (err) return callback(err);
+          try {
+            items[index].rates = rate;
+          } catch(e) {
+            return callback(e);
+          }
+          callback();
         });
       }, function(err) {
+        if(err) return next(err);
         res.json(items);
       });
     });
@@ -109,8 +114,12 @@ try {
     }],
     function (err, result) {
       if (err) throw (err);
-      if (result.length == 0) callback(null, [{"_id": id,"avgRating":0}]);
-      callback(null,result);
+      if (result.length == 0) {
+        callback(null, [{"_id": id,"avgRating":0}]);
+      }
+      else {
+        callback(null,result);
+      }
   });
 }
 catch (err) {
