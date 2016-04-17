@@ -4,7 +4,10 @@ var Item = require('../models/item')
     ,express = require('express')
     ,async = require('async')
     ,router=express.Router();
-
+function isLoggedIn(req, res, next) {
+  //todo update code when auth will be set up
+  next();
+}
 router.route('/items')
   .get(function(req, res, next) {
     //res.send('/api/items');
@@ -27,9 +30,13 @@ router.route('/items')
         });
       }, function(err) {
         if(err) return next(err);
-        res.json(items);
+        res.json({status: "OK", data: items});
       });
     });
+  })
+  .post(function(req, res, next) {
+    var item = new Item(req.body);
+
   });
 router.route('/items/:id')
 .get(function(req, res){
