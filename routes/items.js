@@ -36,6 +36,12 @@ router.route('/items')
   })
   .post(function(req, res, next) {
     var item = new Item(req.body);
+    item.save(function(err){
+      if(err) {
+        res.send({status: 'ERR', data: err});
+      }
+      res.send({status: 'OK', data: item });
+    });
 
   });
 router.route('/items/:id')
