@@ -30,7 +30,7 @@ router.route('/items')
         });
       }, function(err) {
         if(err) return next(err);
-        res.json({status: "OK", data: items});
+        res.json(items);
       });
     });
   })
