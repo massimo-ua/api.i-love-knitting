@@ -75,6 +75,12 @@ router.route('/items/:id')
         res.json({status: "OK"});
       });
   });
+})
+.delete(function(req, res) {
+  Item.remove({_id: req.params.id}, function(err, item){
+    if(err) res.send(err);
+    res.send({status: "OK", message: "Item successfully deleted"});
+  });
 });
 router.route('/items/:id/comments')
 .post(function(req, res) {
