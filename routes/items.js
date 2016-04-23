@@ -30,12 +30,18 @@ router.route('/items')
         });
       }, function(err) {
         if(err) return next(err);
-        res.json({status: "OK", data: items});
+        res.json(items);
       });
     });
   })
   .post(function(req, res, next) {
     var item = new Item(req.body);
+    item.save(function(err){
+      if(err) {
+        res.send({status: 'ERR', data: err});
+      }
+      res.send({status: 'OK', data: item });
+    });
 
   });
 router.route('/items/:id')
@@ -68,6 +74,12 @@ router.route('/items/:id')
         if(err) res.send(err);
         res.json({status: "OK"});
       });
+  });
+})
+.delete(function(req, res) {
+  Item.remove({_id: req.params.id}, function(err, item){
+    if(err) res.send(err);
+    res.send({status: "OK", message: "Item successfully deleted"});
   });
 });
 router.route('/items/:id/comments')
