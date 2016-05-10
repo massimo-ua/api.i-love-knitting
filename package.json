@@ -23,12 +23,15 @@
   "homepage": "https://github.com/massimo-ua/api.i-love-knitting#readme",
   "dependencies": {
     "async": "^2.0.0-rc.1",
+    "busboy": "^0.2.13",
+    "connect-multiparty": "^2.0.0",
     "express": "^4.13.4",
     "express-restify-mongoose": "^3.1.0",
     "mongoose": "^4.4.5",
     "mongoose-auto-increment": "^5.0.1",
     "path": "^0.12.7",
     "restify": "^4.0.4",
-    "slug": "^0.9.1"
+    "slug": "^0.9.1",
+    "uuid": "^2.0.2"
   }
 }

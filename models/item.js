@@ -12,8 +12,9 @@ var itemSchema = new Schema({
   price: {type: 'Number', default: 0},
   datePublished: { type: 'Date', default: Date.now },
   images: [{
-    title: {type: 'String', required: true},
-    url: {type: 'String', required: true}
+    filename: {type: 'String', required: true},
+    mimetype: {type: 'String', required: true},
+    fileid: {type: 'String', required: true}
   }],
   comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
   rates: [{ type: Schema.Types.ObjectId, ref: 'Rate' }]

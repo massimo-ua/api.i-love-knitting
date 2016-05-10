@@ -9,6 +9,7 @@ var cors = require('cors');
 var config = require('./config');
 var routes = require('./routes');
 var items = require('./routes/items');
+var files = require('./routes/files');
 var mongoose = require('mongoose');
 var install = require('./install');
 mongoose.connect(config.DB_URI+config.DB_NAME);
@@ -30,6 +31,7 @@ app.use(session({secret: config.SESSION_SECRET, httpOnly: true, saveUninitialize
 
 app.use('/', routes);
 app.use('/api', items);
+app.use('/files', files);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
