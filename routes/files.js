@@ -5,6 +5,9 @@ var Item = require('../models/item')
    ,fs = require('fs')
    ,Busboy = require('busboy')
 	 ,express = require('express')
+   ,gm = require('gm').subClass({imageMagick: true})
+   ,im = require('imagemagick')
+   ,async = require('async')
 	 ,router=express.Router();
 
 router.route('/upload')
@@ -26,6 +29,40 @@ router.route('/upload')
         else {
           var saveTo = path.join(tmpdir, path.basename(newfile._id));
           file.pipe(fs.createWriteStream(saveTo));
+          var imgFormat = undefined;
+          gm(saveTo).format(function(err, value){
+            imgFormat = value; // note : value may be undefined
+          });
+          async.parallel([
+            function(){
+              im.crop({
+                srcPath: saveTo,
+                dstPath: path.join(tmpdir, path.basename('th_'+newfile._id)),
+                width: 320,
+                height: 150,
+                quality: 0.9,
+                gravity: "North"
+              }, function(err, stdout, stderr){
+                if (err) console.log(err); 
+                else console.log('TH '+newfile._id+' done!');
+              });
+            },
+            function(){
+              im.crop({
+                srcPath: saveTo,
+                dstPath: path.join(tmpdir, path.basename('rs_'+newfile._id)),
+                width: 800,
+                height: 300,
+                quality: 0.9,
+                gravity: "North"
+              }, function(err, stdout, stderr){
+                if (err) console.log(err); 
+                else console.log('RS '+newfile._id+' done!');
+              });
+            }
+            ], function() {
+              console.log('Image processing completed!');
+            });
         }
       });
     });
@@ -40,11 +77,44 @@ router.route('/:id')
 .get(function(req, res) {
   File.findOne({_id: req.params.id})
   .exec(function(err, file) {
-    var filepath = path.join(tmpdir, path.basename(req.params.id));
+    if(err) {
+      res.sendStatus(404);
+    }
     //res.setHeader('Content-disposition', 'attachment; filename="' + file._id + '"');
-    res.setHeader('Content-type', file.mimetype);
-    var filestream = fs.createReadStream(filepath);
-    filestream.pipe(res);
+      var filepath = path.join(tmpdir, path.basename(req.params.id));
+      var filestream = fs.createReadStream(filepath, {
+        'bufferSize': 4 * 1024
+      });
+      filestream.on('readable', function() {
+        res.setHeader('Content-type', file.mimetype);
+        filestream.pipe(res);
+      });
+      filestream.on('error', function(){
+        res.sendStatus(404);// HTTP status 404: NotFound
+      });
+  });
+})
+.delete(function(req,res){
+  File.remove({_id: req.params.id}, function(err, file) {
+    if(err) {
+      res.sendStatus(500);
+    }
+    var filePath = 
+    [
+    path.join(tmpdir, path.basename(req.params.id)),
+    path.join(tmpdir, path.basename('rs_'+req.params.id)),
+    path.join(tmpdir, path.basename('th_'+req.params.id))
+    ]; 
+    filePath.forEach(function(file, index, filePath) {
+      fs.exists(file, function(exists) {
+        if(exists) {
+          fs.unlink(file, function() {
+            console.log(file+' was removed');
+          });
+        }
+      });
+    });
+    res.json({status: 'OK', message: 'File was successfuly removed'})
   });
 });
 module.exports = router;
