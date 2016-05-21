@@ -75,18 +75,20 @@ router.route('/upload')
 });
 router.route('/:id')
 .get(function(req, res) {
+  var kind = ( req.query.kind == undefined ) ? '' : req.query.kind + '_';
+  console.log('kind = "'+kind+'"');
   File.findOne({_id: req.params.id})
   .exec(function(err, file) {
     if(err) {
       res.sendStatus(404);
     }
     //res.setHeader('Content-disposition', 'attachment; filename="' + file._id + '"');
-      var filepath = path.join(tmpdir, path.basename(req.params.id));
+      var filepath = path.join(tmpdir, path.basename(kind + req.params.id));
       var filestream = fs.createReadStream(filepath, {
         'bufferSize': 4 * 1024
       });
       filestream.on('readable', function() {
-        res.setHeader('Content-type', file.mimetype);
+        //res.setHeader('Content-type', file.mimetype);
         filestream.pipe(res);
       });
       filestream.on('error', function(){

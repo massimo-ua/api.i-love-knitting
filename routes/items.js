@@ -1,6 +1,7 @@
 var Item = require('../models/item')
     ,Comment = require('../models/comment')
     ,Rate = require('../models/rate')
+    ,File = require('../models/file')
     ,express = require('express')
     ,async = require('async')
     ,router=express.Router();
@@ -13,6 +14,7 @@ router.route('/items')
     //res.send('/api/items');
     Item.find({})
     .populate('comments')
+    .populate('images')
     .lean()
     .exec(function(err, items) {
       if(err) {
@@ -35,11 +37,36 @@ router.route('/items')
     });
   })
   .post(function(req, res, next) {
-    var item = new Item(req.body);
+    var item = new Item();
+    item.title = req.body.title;
+    item.content = req.body.content;
+    item.price = req.body.price;
+    item.author = req.body.author;
+    item.images = req.body.images;
     item.save(function(err){
       if(err) {
         res.send({status: 'ERR', data: err});
       }
+      /*if(req.body.images != 'undefined' && req.body.images.length > 0) {
+        var images = req.body.images;
+        images.forEach(function(image, index, images){
+          var counter = 0;
+          File.findOne({_id: image})
+          .exec(function(err, file){
+            if(err) {
+              console.log(err);
+            }
+            else {
+              item.push(file);
+              counter++;
+            }
+          });
+          if(counter > 0) item.save(function(err){
+            if(err) console.log(err);
+            console.log('All files saved');
+          });
+        });
+      }*/
       res.send({status: 'OK', data: item });
     });
 
@@ -53,6 +80,7 @@ router.route('/items/:id')
     match: {isDisabled: false},
     options: { sort: '-datePublished' }
    })
+  .populate('images')
   .exec(function(err, item){
     if(err) res.send(err);
     GetItemRating(item._id,function(err,rate){
