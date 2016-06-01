@@ -86,7 +86,7 @@ router.route('/items/:id')
     GetItemRating(item._id,function(err,rate){
       if(err) res.send(err);
       item.rates = rate;
-      res.json({status: "OK", data: item});
+      res.json(item);
     });
   });
 
@@ -95,12 +95,17 @@ router.route('/items/:id')
   Item.findOne({_id: req.params.id},function(err, item){
     if(err) res.send(err);
       for(property in req.body) {
-        console.log(req.body);
+        //console.log(req.body[property]);
         item[property] = req.body[property];
       }
       item.save(function(err) {
-        if(err) res.send(err);
-        res.json({status: "OK"});
+        if(err) {
+          console.log(err);
+          res.send(err);
+        }
+        else {
+          res.json({status: "OK", message: "Item updated successfully!"});
+        }
       });
   });
 })
@@ -109,6 +114,9 @@ router.route('/items/:id')
     if(err) res.send(err);
     res.send({status: "OK", message: "Item successfully deleted"});
   });
+})
+.options(function(req, res) {
+  res.status(200).send();
 });
 router.route('/items/:id/comments')
 .post(function(req, res) {
