@@ -4,11 +4,10 @@ var Item = require('../models/item')
     ,File = require('../models/file')
     ,express = require('express')
     ,async = require('async')
-    ,router=express.Router();
-function isLoggedIn(req, res, next) {
-  //todo update code when auth will be set up
-  next();
-}
+    ,router=express.Router()
+    ,config = require('../config')
+    ,isAuthenticated = require('../middleware/auth');
+
 router.route('/items')
   .get(function(req, res, next) {
     //res.send('/api/items');
@@ -36,7 +35,7 @@ router.route('/items')
       });
     });
   })
-  .post(function(req, res, next) {
+  .post(isAuthenticated, function(req, res, next) {
     var item = new Item();
     item.title = req.body.title;
     item.content = req.body.content;
@@ -47,26 +46,6 @@ router.route('/items')
       if(err) {
         res.send({status: 'ERR', data: err});
       }
-      /*if(req.body.images != 'undefined' && req.body.images.length > 0) {
-        var images = req.body.images;
-        images.forEach(function(image, index, images){
-          var counter = 0;
-          File.findOne({_id: image})
-          .exec(function(err, file){
-            if(err) {
-              console.log(err);
-            }
-            else {
-              item.push(file);
-              counter++;
-            }
-          });
-          if(counter > 0) item.save(function(err){
-            if(err) console.log(err);
-            console.log('All files saved');
-          });
-        });
-      }*/
       res.send({status: 'OK', data: item });
     });
 
@@ -89,9 +68,8 @@ router.route('/items/:id')
       res.json(item);
     });
   });
-
 })
-.put(function(req, res) {
+.put(isAuthenticated, function(req, res) {
   Item.findOne({_id: req.params.id},function(err, item){
     if(err) res.send(err);
       for(property in req.body) {
@@ -109,7 +87,7 @@ router.route('/items/:id')
       });
   });
 })
-.delete(function(req, res) {
+.delete(isAuthenticated, function(req, res) {
   Item.remove({_id: req.params.id}, function(err, item){
     if(err) res.send(err);
     res.send({status: "OK", message: "Item successfully deleted"});
