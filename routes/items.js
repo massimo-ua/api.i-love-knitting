@@ -2,6 +2,7 @@ var Item = require('../models/item')
     ,Comment = require('../models/comment')
     ,Rate = require('../models/rate')
     ,File = require('../models/file')
+    ,User = require('../models/user')
     ,express = require('express')
     ,async = require('async')
     ,router=express.Router()
@@ -14,6 +15,7 @@ router.route('/items')
     Item.find({})
     .populate('comments')
     .populate('images')
+    .populate('author')
     .lean()
     .exec(function(err, items) {
       if(err) {
@@ -60,6 +62,7 @@ router.route('/items/:id')
     options: { sort: '-datePublished' }
    })
   .populate('images')
+  .populate('author')
   .exec(function(err, item){
     if(err) res.send(err);
     GetItemRating(item._id,function(err,rate){
@@ -70,7 +73,7 @@ router.route('/items/:id')
   });
 })
 .put(isAuthenticated, function(req, res) {
-  Item.findOne({_id: req.params.id},function(err, item){
+  Item.findOne({_id: req.params.id, author: req.user},function(err, item){
     if(err) res.send(err);
       for(property in req.body) {
         //console.log(req.body[property]);
@@ -88,7 +91,7 @@ router.route('/items/:id')
   });
 })
 .delete(isAuthenticated, function(req, res) {
-  Item.remove({_id: req.params.id}, function(err, item){
+  Item.remove({ _id: req.params.id, author: req.user }, function(err, item){
     if(err) res.send(err);
     res.send({status: "OK", message: "Item successfully deleted"});
   });
@@ -136,6 +139,36 @@ router.route('/items/:id/comments')
           });
         });
     });
+});
+router.route('/profile/items')
+.get(isAuthenticated, function(req, res) {
+  User.findById(req.user, function(err, user) {
+    if(!user) res.status(404).send('Profile items not found');
+      Item.find({author: req.user})
+      .populate('comments')
+      .populate('images')
+      .populate('author')
+      .lean()
+      .exec(function(err, items) {
+        if(err) {
+          res.send(err);
+        }
+        async.forEachOf(items, function(item, index, callback) {
+          GetItemRating(item._id, function(err, rate) {
+            if (err) return callback(err);
+            try {
+              items[index].rates = rate;
+            } catch(e) {
+              return callback(e);
+            }
+            callback();
+          });
+        }, function(err) {
+        if(err) return next(err);
+          res.json(items);
+        });
+      });
+  });
 });
 
 function GetItemRating(id, callback) {
