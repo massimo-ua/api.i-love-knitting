@@ -13,7 +13,9 @@ var itemSchema = new Schema({
   datePublished: { type: 'Date', default: Date.now },
   images: [{ type: Schema.Types.ObjectId, ref: 'File' }],
   comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
-  rates: [{ type: Schema.Types.ObjectId, ref: 'Rate' }]
+  rates: [{ type: Schema.Types.ObjectId, ref: 'Rate' }],
+  validFrom: { type: 'Date', default: Date.now },
+  validTo: { type: 'Date' },
 });
 itemSchema.plugin(increment.plugin, { model: 'Item', startAt: 1 });
 itemSchema.pre('save', function(next) {

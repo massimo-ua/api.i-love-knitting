@@ -9,7 +9,7 @@ var Item = require('../models/item')
     ,config = require('../config')
     ,isAuthenticated = require('../middleware/auth');
 
-router.route('/items')
+router.route('/')
   .get(function(req, res, next) {
     //res.send('/api/items');
     Item.find({})
@@ -52,7 +52,7 @@ router.route('/items')
     });
 
   });
-router.route('/items/:id')
+router.route('/:id')
 .get(function(req, res){
   Item.findOne({_id: req.params.id})
   .lean()
@@ -99,7 +99,7 @@ router.route('/items/:id')
 .options(function(req, res) {
   res.status(200).send();
 });
-router.route('/items/:id/comments')
+router.route('/:id/comments')
 .post(function(req, res) {
   Item.findOne({_id: req.params.id},function(err, item){
     if(err) res.send(err);
@@ -118,7 +118,7 @@ router.route('/items/:id/comments')
       });
   });
   });
-  router.route('/items/:id/ratings')
+  router.route('/:id/ratings')
   .post(function(req, res) {
     //console.log(req);
     Item.findOne({_id: req.params.id},function(err, item){

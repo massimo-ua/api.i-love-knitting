@@ -17,7 +17,8 @@ var userSchema = new Schema({
 	yahoo: String,
 	twitter: String,
 	twitch: String,
-	approved: { type: Boolean, default: false }
+	approved: { type: Boolean, default: false },
+	isStaff: { type: Boolean, default: false }
 });
 userSchema.pre('save', function(next) {
 	var user = this;
