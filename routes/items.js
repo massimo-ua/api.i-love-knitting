@@ -7,8 +7,7 @@ var Item = require('../models/item')
     ,async = require('async')
     ,router=express.Router()
     ,config = require('../config')
-    ,isAuthenticated = require('../middleware/auth');
-
+    ,auth = require('../middleware/auth');
 router.route('/')
   .get(function(req, res, next) {
     //res.send('/api/items');
@@ -37,7 +36,7 @@ router.route('/')
       });
     });
   })
-  .post(isAuthenticated, function(req, res, next) {
+  .post(auth.isAuthenticated, function(req, res, next) {
     var item = new Item();
     item.title = req.body.title;
     item.content = req.body.content;
@@ -72,7 +71,7 @@ router.route('/:id')
     });
   });
 })
-.put(isAuthenticated, function(req, res) {
+.put(auth.isAuthenticated, function(req, res) {
   Item.findOne({_id: req.params.id, author: req.user},function(err, item){
     if(err) res.send(err);
       for(property in req.body) {
@@ -90,7 +89,7 @@ router.route('/:id')
       });
   });
 })
-.delete(isAuthenticated, function(req, res) {
+.delete(auth.isAuthenticated, function(req, res) {
   Item.remove({ _id: req.params.id, author: req.user }, function(err, item){
     if(err) res.send(err);
     res.send({status: "OK", message: "Item successfully deleted"});
@@ -141,7 +140,7 @@ router.route('/:id/comments')
     });
 });
 router.route('/profile/items')
-.get(isAuthenticated, function(req, res) {
+.get(auth.isAuthenticated, function(req, res) {
   User.findById(req.user, function(err, user) {
     if(!user) res.status(404).send('Profile items not found');
       Item.find({author: req.user})

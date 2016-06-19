@@ -4,7 +4,7 @@ var express = require('express')
 	,config = require('../config')
 	,moment = require('moment')
 	,User = require('../models/user')
-	,isAuthenticated = require('../middleware/auth');
+	,auth = require('../middleware/auth');
 
 router.route('/login')
 .post(function(req, res){
@@ -44,13 +44,13 @@ router.route('/signup')
 });
 
 router.route('/profile')
-.get(isAuthenticated, function(req, res) {
+.get(auth.isAuthenticated, function(req, res) {
 	User.findById(req.user, function(err, user) {
 		res.json(user);
 	});
 
 })
-.put(isAuthenticated, function(req, res) {
+.put(auth.isAuthenticated, function(req, res) {
 	User.findById(req.user, function(err, user) {
 		if(!user) {
 			return res.status(400).send({ message: 'User not found' });

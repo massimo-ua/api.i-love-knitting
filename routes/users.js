@@ -2,10 +2,10 @@ var User = require('../models/user')
     ,express = require('express')
     ,router=express.Router()
     ,config = require('../config')
-    ,isAuthenticated = require('../middleware/auth');
+    ,auth = require('../middleware/auth');
 
 router.route('/')
-.get(function(req, res, next) {
+.get([auth.isAuthenticated, auth.isStaff], function(req, res, next) {
 	var approved = ( req.query.type == undefined || req.query.type == 'new' ) ? false : true;
 	User.find({approved: approved})
 	.exec(function(err,users){
@@ -16,7 +16,7 @@ router.route('/')
 	});
 });
 router.route('/:id')
-.put(function(req, res) {
+.put([auth.isAuthenticated, auth.isStaff], function(req, res) {
   User.findOne({_id: req.params.id},function(err, user){
     if(err) res.send(err);
       for(property in req.body) {

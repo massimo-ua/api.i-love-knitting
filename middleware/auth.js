@@ -1,10 +1,11 @@
 var jwt = require('jwt-simple')
     ,config = require('../config')
-    ,moment = require('moment');
+    ,moment = require('moment')
+    ,User = require('../models/user');
 
-function isAuthenticated(req, res, next) {
+var isAuthenticated = function(req, res, next) {
   if (!req.header('Authorization')) {
-    return res.status(401).send({ message: 'Please make sure your request has an Authorization header' });
+    return next({ status: 401, message: 'Please make sure your request has an Authorization header' });
   }
   var token = req.header('Authorization').split(' ')[1];
   var payload = null;
@@ -12,13 +13,24 @@ function isAuthenticated(req, res, next) {
     payload = jwt.decode(token, config.SESSION_SECRET);
   }
   catch (err) {
-    return res.status(401).send({ message: err.message });
+    return next({ status: 401, message: err.message });
   }
   if (payload.exp <= moment().unix()) {
-    return res.status(401).send({ message: 'Token has expired' });
+    next({status: 401, message: "Token has expired"});
   }
   req.user = payload.sub;
   next();
 }
-
-module.exports = isAuthenticated;
+var isStaff  = function(req, res, next) {
+  User.findOne({_id: req.user},function(err, user){
+    if(err) {
+      next({status: 403, message: "Forbidden"});
+    }
+    if(!user.isStaff) {
+      next({status: 403, message: "Forbidden"});
+    }
+    next();
+  });
+}
+module.exports.isAuthenticated = isAuthenticated;
+module.exports.isStaff = isStaff;
