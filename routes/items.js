@@ -2,19 +2,19 @@ var Item = require('../models/item')
     ,Comment = require('../models/comment')
     ,Rate = require('../models/rate')
     ,File = require('../models/file')
+    ,User = require('../models/user')
     ,express = require('express')
     ,async = require('async')
-    ,router=express.Router();
-function isLoggedIn(req, res, next) {
-  //todo update code when auth will be set up
-  next();
-}
-router.route('/items')
+    ,router=express.Router()
+    ,config = require('../config')
+    ,auth = require('../middleware/auth');
+router.route('/')
   .get(function(req, res, next) {
     //res.send('/api/items');
     Item.find({})
     .populate('comments')
     .populate('images')
+    .populate('author')
     .lean()
     .exec(function(err, items) {
       if(err) {
@@ -36,7 +36,7 @@ router.route('/items')
       });
     });
   })
-  .post(function(req, res, next) {
+  .post(auth.isAuthenticated, function(req, res, next) {
     var item = new Item();
     item.title = req.body.title;
     item.content = req.body.content;
@@ -47,31 +47,11 @@ router.route('/items')
       if(err) {
         res.send({status: 'ERR', data: err});
       }
-      /*if(req.body.images != 'undefined' && req.body.images.length > 0) {
-        var images = req.body.images;
-        images.forEach(function(image, index, images){
-          var counter = 0;
-          File.findOne({_id: image})
-          .exec(function(err, file){
-            if(err) {
-              console.log(err);
-            }
-            else {
-              item.push(file);
-              counter++;
-            }
-          });
-          if(counter > 0) item.save(function(err){
-            if(err) console.log(err);
-            console.log('All files saved');
-          });
-        });
-      }*/
       res.send({status: 'OK', data: item });
     });
 
   });
-router.route('/items/:id')
+router.route('/:id')
 .get(function(req, res){
   Item.findOne({_id: req.params.id})
   .lean()
@@ -81,6 +61,7 @@ router.route('/items/:id')
     options: { sort: '-datePublished' }
    })
   .populate('images')
+  .populate('author')
   .exec(function(err, item){
     if(err) res.send(err);
     GetItemRating(item._id,function(err,rate){
@@ -89,10 +70,9 @@ router.route('/items/:id')
       res.json(item);
     });
   });
-
 })
-.put(function(req, res) {
-  Item.findOne({_id: req.params.id},function(err, item){
+.put(auth.isAuthenticated, function(req, res) {
+  Item.findOne({_id: req.params.id, author: req.user},function(err, item){
     if(err) res.send(err);
       for(property in req.body) {
         //console.log(req.body[property]);
@@ -109,8 +89,8 @@ router.route('/items/:id')
       });
   });
 })
-.delete(function(req, res) {
-  Item.remove({_id: req.params.id}, function(err, item){
+.delete(auth.isAuthenticated, function(req, res) {
+  Item.remove({ _id: req.params.id, author: req.user }, function(err, item){
     if(err) res.send(err);
     res.send({status: "OK", message: "Item successfully deleted"});
   });
@@ -118,7 +98,7 @@ router.route('/items/:id')
 .options(function(req, res) {
   res.status(200).send();
 });
-router.route('/items/:id/comments')
+router.route('/:id/comments')
 .post(function(req, res) {
   Item.findOne({_id: req.params.id},function(err, item){
     if(err) res.send(err);
@@ -137,7 +117,7 @@ router.route('/items/:id/comments')
       });
   });
   });
-  router.route('/items/:id/ratings')
+  router.route('/:id/ratings')
   .post(function(req, res) {
     //console.log(req);
     Item.findOne({_id: req.params.id},function(err, item){
@@ -158,6 +138,36 @@ router.route('/items/:id/comments')
           });
         });
     });
+});
+router.route('/profile/items')
+.get(auth.isAuthenticated, function(req, res) {
+  User.findById(req.user, function(err, user) {
+    if(!user) res.status(404).send('Profile items not found');
+      Item.find({author: req.user})
+      .populate('comments')
+      .populate('images')
+      .populate('author')
+      .lean()
+      .exec(function(err, items) {
+        if(err) {
+          res.send(err);
+        }
+        async.forEachOf(items, function(item, index, callback) {
+          GetItemRating(item._id, function(err, rate) {
+            if (err) return callback(err);
+            try {
+              items[index].rates = rate;
+            } catch(e) {
+              return callback(e);
+            }
+            callback();
+          });
+        }, function(err) {
+        if(err) return next(err);
+          res.json(items);
+        });
+      });
+  });
 });
 
 function GetItemRating(id, callback) {

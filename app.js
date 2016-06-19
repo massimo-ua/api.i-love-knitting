@@ -10,6 +10,8 @@ var config = require('./config');
 var routes = require('./routes');
 var items = require('./routes/items');
 var files = require('./routes/files');
+var auth = require('./routes/auth');
+var users = require('./routes/users');
 var mongoose = require('mongoose');
 var install = require('./install');
 mongoose.connect(config.DB_URI+config.DB_NAME);
@@ -27,11 +29,11 @@ app.use(express.static(path.join(__dirname, config.STATIC_DIR)));
 app.use(cors({origin:'http://localhost:8000',credentials:true}));
 app.use(session({secret: config.SESSION_SECRET, httpOnly: true, saveUninitialized: true, resave: true,cookie: { maxAge: 1800000 }}));
 
-
-
 app.use('/', routes);
-app.use('/api', items);
+app.use('/api/items', items);
 app.use('/files', files);
+app.use('/auth', auth);
+app.use('/api/users', users);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
