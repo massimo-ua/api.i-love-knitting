@@ -15,5 +15,23 @@ router.route('/')
       	res.json(users);
 	});
 });
-
+router.route('/:id')
+.put(function(req, res) {
+  User.findOne({_id: req.params.id},function(err, user){
+    if(err) res.send(err);
+      for(property in req.body) {
+        //console.log(req.body[property]);
+        user[property] = req.body[property];
+      }
+      user.save(function(err) {
+        if(err) {
+          console.log(err);
+          res.send(err);
+        }
+        else {
+          res.json({status: "OK", message: "User updated successfully!"});
+        }
+      });
+  });
+})
 module.exports=router;
