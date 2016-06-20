@@ -11,7 +11,7 @@ var Item = require('../models/item')
 router.route('/')
   .get(function(req, res, next) {
     //res.send('/api/items');
-    Item.find({})
+    Item.find({validFrom: {$lte:new Date()},validTo: {$gte:new Date()}})
     .populate('comments')
     .populate('images')
     .populate('author')
@@ -53,7 +53,7 @@ router.route('/')
   });
 router.route('/:id')
 .get(function(req, res){
-  Item.findOne({_id: req.params.id})
+  Item.findOne({_id: req.params.id,validFrom: {$lte:new Date()},validTo: {$gte:new Date()}})
   .lean()
   .populate({
     path: 'comments',
