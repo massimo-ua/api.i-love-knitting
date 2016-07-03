@@ -8,7 +8,7 @@ var express = require('express')
 
 router.route('/login')
 .post(function(req, res){
-	User.findOne({ email: req.body.email }, '+password approved', function(err, user) {
+	User.findOne({ email: req.body.email }, '+password approved displayName isStaff', function(err, user) {
 		if (!user) {
 			return res.status(401).send({ message: 'Invalid email and/or password' });
 		}
@@ -72,7 +72,9 @@ function createJWT(user) {
 	var payload = {
 		sub: user._id,
 		iat: moment().unix(),
-		exp: moment().add(14, 'days').unix()
+		exp: moment().add(14, 'days').unix(),
+		displayName: user.displayName,
+		isStaff: user.isStaff
 	};
 	return jwt.encode(payload, config.SESSION_SECRET);
 }

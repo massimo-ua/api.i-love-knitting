@@ -11,11 +11,15 @@ var Item = require('../models/item')
 router.route('/')
   .get(function(req, res, next) {
     //res.send('/api/items');
+    var pagination = paging(req.query.page);
     Item.find({validFrom: {$lte:new Date()},validTo: {$gte:new Date()}})
     .populate('comments')
     .populate('images')
     .populate('author')
     .lean()
+    .limit(pagination.limit)
+    .skip(pagination.skip)
+    .sort('-datePublished')
     .exec(function(err, items) {
       if(err) {
         res.send(err);
@@ -38,11 +42,9 @@ router.route('/')
   })
   .post(auth.isAuthenticated, function(req, res, next) {
     var item = new Item();
-    item.title = req.body.title;
-    item.content = req.body.content;
-    item.price = req.body.price;
-    item.author = req.body.author;
-    item.images = req.body.images;
+    for(property in req.body) {
+        item[property] = req.body[property];
+    }
     item.save(function(err){
       if(err) {
         res.send({status: 'ERR', data: err});
@@ -52,7 +54,7 @@ router.route('/')
 
   });
 router.route('/:id')
-.get(function(req, res){
+.get(function(req, res, next){
   Item.findOne({_id: req.params.id,validFrom: {$lte:new Date()},validTo: {$gte:new Date()}})
   .lean()
   .populate({
@@ -64,11 +66,14 @@ router.route('/:id')
   .populate('author')
   .exec(function(err, item){
     if(err) res.send(err);
+    if(item) {
     GetItemRating(item._id,function(err,rate){
       if(err) res.send(err);
       item.rates = rate;
       res.json(item);
     });
+  }
+  else next({status: 404});
   });
 })
 .put(auth.isAuthenticated, function(req, res) {
@@ -190,5 +195,12 @@ try {
 catch (err) {
   callback(null, [{"_id": id,"avgRating":0}]);
 }
+}
+function paging(page) {
+  var page = page ? page : 1;
+  return {
+    limit: config.ITEMS_PER_PAGE,
+    skip: (page-1)*config.ITEMS_PER_PAGE
+  }
 }
 module.exports=router;

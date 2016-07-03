@@ -5,5 +5,6 @@ module.exports = {
   LISTEN_PORT: 3000,
   LISTEN_IP: '127.0.0.1',
   DB_NAME: 'ilk',
-  DB_URI: 'mongodb://localhost/'
+  DB_URI: 'mongodb://localhost/',
+  ITEMS_PER_PAGE: 6
 }
